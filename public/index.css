@@ -1,0 +1,18 @@
+body {
+    background-color: black;
+    border: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+canvas {
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    padding: 0;
+}
