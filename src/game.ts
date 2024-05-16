@@ -1,18 +1,18 @@
 class Game {
     renderer:Renderer;
-    levelData:LevelData;
-    entities:Array<Entity> = [];
+    levelDataLevels:LevelData[] = [];
+    entities:Entity[][] = [];
     gui:Gui;
     lastTimestamp:number;
 
     constructor(canvas:HTMLCanvasElement) {
         this.renderer = new Renderer(canvas);
-        this.levelData = new LevelData();
+        this.levelDataLevels.push(new LevelData(), new LevelData(), new LevelData());
         Controls.init();
     }
 
     async init() {
-        this.entities.push(new Player(this));
+        this.entities.push([], [new Player(this)], []);
 
         this.gui = new LevelSelectGui();
 
@@ -22,9 +22,11 @@ class Game {
     gameTick(deltaTime:number) {
         if (this.gui) {
             this.gui.update(this, deltaTime);
-        } else if (this.levelData) {
+        } else if (this.levelDataLevels.length > 0) {
             for (let i = 0; i < this.entities.length; i++) {
-                this.entities[i].update(this, deltaTime);
+                for (let j = 0; j < this.entities[i].length; j++) {
+                    this.entities[i][j].update(this, deltaTime);
+                }
             }
         }
     }

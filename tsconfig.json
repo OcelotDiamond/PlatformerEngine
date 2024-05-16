@@ -4,7 +4,8 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "target": "ESNext"
+        "target": "ESNext",
+        "outDir": "public/scripts"
     },
-    "include": ["public/scripts/**/*", "public/scripts/*"]
+    "include": ["src/**/*", "src/*"]
 }

@@ -3,15 +3,16 @@ class Player extends Entity {
     h = 48;
     friction = 2;
     movementSpeed = 5;
-    jumpPower = 20;
+    jumpPower = 18;
     onGround = false;
     sneaking = false;
-    maxCoyoteTime = 5;
+    maxCoyoteTime = 3;
     coyoteTime = 0;
     lastMovementDirection = false;
-    gravityForce = 1.5;
+    gravityForce = 1;
     windForceX = 0;
     windForceY = 0;
+    levelDataIndex = 1;
     textures = [];
     constructor(game) {
         super(game);
@@ -31,7 +32,7 @@ class Player extends Entity {
         return this.jumpPower;
     }
     draw(gl, game) {
-        game.renderer.drawBasicTexture(gl, this.sneaking ? this.textures[1] : this.textures[0], this.x, this.y, this.w, this.h, this.lastMovementDirection);
+        game.renderer.drawBasicTexture(gl, this.sneaking ? this.textures[1] : this.textures[0], Math.round(this.x / 3) * 3, Math.round(this.y / 3) * 3, this.w, this.h, this.lastMovementDirection);
     }
     update(game, deltaTime) {
         let dx = this.dx;
@@ -41,12 +42,8 @@ class Player extends Entity {
                 dy = -this.jumpPower;
                 this.coyoteTime = 0;
             }
-            if (this.dy < 0) {
-                this.gravityForce = 0.9;
-            }
         }
         else {
-            this.gravityForce = 1;
         }
         if ((Controls.isKeyDown('s') || Controls.isKeyDown('shift') || Controls.isKeyDown('arrowdown'))) {
             if (!this.sneaking) {
@@ -58,7 +55,7 @@ class Player extends Entity {
             }
         }
         else {
-            if (this.sneaking && this.checkCollision(this.x, this.y - 16, this.w, 48, game.levelData)) {
+            if (this.sneaking && this.checkCollision(this.x, this.y - 16, this.w, 48, game.levelDataLevels[this.levelDataIndex])) {
                 this.h = 48;
                 this.y -= 16;
                 this.jumpPower = 20;
@@ -84,13 +81,13 @@ class Player extends Entity {
                 this.lastMovementDirection = false;
             }
         }
-        dx = this.doXCollision(game, this.x, this.y, dx);
+        dx = this.doXCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, dx);
         this.x += dx;
         const preDY = dy;
         dy += this.gravityForce;
         dx += this.windForceX;
         dy += this.windForceY;
-        dy = this.doYCollision(game, this.x, this.y, dy);
+        dy = this.doYCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, dy);
         this.y += dy;
         this.coyoteTime -= 1;
         if (preDY == dy) {

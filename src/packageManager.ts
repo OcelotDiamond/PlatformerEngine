@@ -21,7 +21,7 @@ class PackageManager {
     }
 
     static #syncMultiLoadLogic<T extends Loadable>(generator:() => T, sources:string[], callback:(element:T[]) => void = null, augmenter:(element:T) => void = null):T[] {
-        let array:Array<T> = [];
+        let array:T[] = [];
         if (callback !== null) {
             let callsRemaining = sources.length;
             for (let i = 0; i < sources.length; i++) {

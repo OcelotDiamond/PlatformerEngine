@@ -9,6 +9,13 @@ class Renderer {
 
         window.addEventListener('resize', this.updateCanvasSize.bind(this));
         this.updateCanvasSize();
+
+        const gl = this.gl;
+
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //gl.enable(gl.DEPTH_TEST);
+        //gl.depthFunc(gl.GREATER);  
     }
 
     draw(game:Game) {
@@ -16,17 +23,21 @@ class Renderer {
             this.gl.clearColor(0, 0, 0, 1);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-            if (game.levelData.tileData.length > 0) {
-                for (let i = 0; i < game.entities.length; i++) {
-                    game.entities[i].draw(this.gl, game);
-                }
-                
-                const data = game.levelData;
+            const data = game.levelDataLevels;
 
-                for (let i = 0; i < data.tiles.length; i++) {
-                    data.tiles[i].drawTiles(this.gl, game, i);
+            for (let i = 0; i < Math.max(data.length, game.entities.length); i++) {
+                if (game.entities[i]) {
+                    for (let j = 0; j < game.entities[i].length; j++) {
+                        game.entities[i][j].draw(this.gl, game);
+                    }
+                }
+                if (data[i] && data[i].tileSet) {
+                    for (let j = 0; j < data[i].tileSet.length; j++) {
+                        data[i].tiles[j].drawTiles(this.gl, game, j, i);
+                    }
                 }
             }
+
             if (game.gui) {
                 game.gui.drawElements(game);
             } 
@@ -67,6 +78,8 @@ class Renderer {
         }
 
         const texCoordArray = new Float32Array(defaultTexCoordArray);
+
+        console.log(x, y, x2, y2)
 
         this.drawTextures(gl, texture, posArray, texCoordArray, 6);
     }

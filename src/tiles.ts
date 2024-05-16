@@ -3,7 +3,7 @@ abstract class Tile {
 
     constructor(gl:WebGL2RenderingContext) {}
 
-    drawTiles(gl:WebGL2RenderingContext, game:Game, tileIndex:number) {}
+    drawTiles(gl:WebGL2RenderingContext, game:Game, tileIndex:number, tileLevel:number) {}
 }
 
 abstract class TexturedTile extends Tile {
@@ -26,7 +26,7 @@ abstract class TexturedTile extends Tile {
         this.glTexture = GLUtils.setupTexture(gl, this.texture);
     }
 
-    getTexCoords(x:number, y:number, levelData:LevelData, tileIndex:number):Array<number> {
+    getTexCoords(x:number, y:number, levelData:LevelData, tileIndex:number):number[] {
         const a = this.uvOffset / this.uvDivisions;
         const b = (this.uvOffset + 1) / this.uvDivisions;
 
@@ -47,14 +47,7 @@ abstract class TexturedTile extends Tile {
         const x2 = x1 + levelData.tileSize;
         const y2 = y1 + levelData.tileSize;
 
-        return [
-            x1, y1,
-            x2, y1,
-            x1, y2,
-            x1, y2,
-            x2, y1,
-            x2, y2
-        ];
+        return MathHelper.generateSquareMesh(x1, y1, x2, y2);
     }
 
     getCount(x:number, y:number, levelData:LevelData, tileIndex:number) {
@@ -62,19 +55,13 @@ abstract class TexturedTile extends Tile {
     }
 
     getGeometry(levelData:LevelData, tileIndex:number):[Float32Array, Float32Array, number] {
-        const posArray:Array<number> = [];
-        const texCoordArray:Array<number> = [];
+        const posArray:number[] = [];
+        const texCoordArray:number[] = [];
         let count = 0;
 
         for (let i = 0; i < levelData.tileData.length; i++) {
             if (levelData.tileData[i] === tileIndex) {
                 const [x, y] = levelData.convertInBounds(i);
-
-                const x1 = x * levelData.tileSize;
-                const y1 = y * levelData.tileSize;
-
-                const x2 = x1 + levelData.tileSize;
-                const y2 = y1 + levelData.tileSize;
 
                 posArray.push(...this.getPolygons(x, y, levelData, tileIndex));
 
@@ -87,8 +74,8 @@ abstract class TexturedTile extends Tile {
         return [new Float32Array(posArray), new Float32Array(texCoordArray), count];
     }
 
-    drawTiles(gl: WebGL2RenderingContext, game: Game, tileIndex:number) {
-        const [geometry, texCoords, count] = this.getGeometry(game.levelData, tileIndex);
+    drawTiles(gl: WebGL2RenderingContext, game: Game, tileIndex:number, tileLevel:number) {
+        const [geometry, texCoords, count] = this.getGeometry(game.levelDataLevels[tileLevel], tileIndex);
 
         game.renderer.drawTextures(gl, this.glTexture, geometry, texCoords, count);
     }

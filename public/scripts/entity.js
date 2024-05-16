@@ -7,6 +7,7 @@ class Entity {
     dy = 0;
     isIntractable = false;
     isSolid = false;
+    levelDataIndex;
     constructor(game) {
         this.init(game);
     }
@@ -14,16 +15,16 @@ class Entity {
     update(game, deltaTime) { }
     draw(gl, game) { }
     onInteraction(player, game) { }
-    doXCollision(game, x, y, dx) {
+    doXCollision(levelData, x, y, dx) {
         dx = Math.round(dx);
         let iterations = Math.floor(dx / this.w);
-        const endBehavior = this.checkCollision(x + dx, y, this.w, this.h, game.levelData);
+        const endBehavior = this.checkCollision(x + dx, y, this.w, this.h, levelData);
         let passLocation = NaN;
         let failLocation = NaN;
         let failed = false;
         for (let i = 1; i <= iterations; i++) {
             const testX = Math.round(x + dx * i / (iterations + 1));
-            if (!this.checkCollision(testX, y, this.w, this.h, game.levelData)) {
+            if (!this.checkCollision(testX, y, this.w, this.h, levelData)) {
                 failLocation = testX;
                 failed = true;
                 break;
@@ -44,7 +45,7 @@ class Entity {
             for (let i = 0; i <= Math.abs(failLocation - passLocation); i++) {
                 line.push(passLocation + i * Math.sign(failLocation - passLocation));
             }
-            const index = MathHelper.booleanBinarySearch(line.length, index => this.checkCollision(line[index], y, this.w, this.h, game.levelData)) - 1;
+            const index = MathHelper.booleanBinarySearch(line.length, index => this.checkCollision(line[index], y, this.w, this.h, levelData)) - 1;
             dx = line[index] - x;
         }
         if (isNaN(dx)) {
@@ -52,16 +53,16 @@ class Entity {
         }
         return dx;
     }
-    doYCollision(game, x, y, dy) {
+    doYCollision(levelData, x, y, dy) {
         dy = Math.round(dy);
         let iterations = Math.floor(dy / this.h);
-        const endBehavior = this.checkCollision(x, y + dy, this.w, this.h, game.levelData);
+        const endBehavior = this.checkCollision(x, y + dy, this.w, this.h, levelData);
         let passLocation = NaN;
         let failLocation = NaN;
         let failed = false;
         for (let i = 1; i <= iterations; i++) {
             const testY = Math.round(y + dy * i / (iterations + 1));
-            if (!this.checkCollision(x, testY, this.w, this.h, game.levelData)) {
+            if (!this.checkCollision(x, testY, this.w, this.h, levelData)) {
                 failLocation = testY;
                 failed = true;
                 break;
@@ -79,13 +80,51 @@ class Entity {
             for (let i = 0; i <= Math.abs(failLocation - passLocation); i++) {
                 line.push(passLocation + i * Math.sign(failLocation - passLocation));
             }
-            const index = MathHelper.booleanBinarySearch(line.length, index => this.checkCollision(x, line[index], this.w, this.h, game.levelData)) - 1;
+            const index = MathHelper.booleanBinarySearch(line.length, index => this.checkCollision(x, line[index], this.w, this.h, levelData)) - 1;
             dy = line[index] - y;
         }
         if (isNaN(dy)) {
             dy = 0;
         }
         return dy;
+    }
+    cornerCorrectX(levelData, x, y, dx, maxSnapDistance) {
+        let dyModifier = Number.POSITIVE_INFINITY;
+        let didChange = false;
+        if (dx !== 0) {
+            for (let i = -maxSnapDistance; i <= maxSnapDistance; i++) {
+                if (Math.abs(i) < dyModifier && this.checkCollision(x + Math.sign(dx), y + i, this.w, this.h, levelData)) {
+                    didChange = true;
+                    dyModifier = i;
+                }
+            }
+        }
+        else {
+            dyModifier = 0;
+        }
+        if (!didChange) {
+            dyModifier = 0;
+        }
+        return dyModifier;
+    }
+    cornerCorrectY(levelData, x, y, dy, maxSnapDistance) {
+        let dxModifier = Number.POSITIVE_INFINITY;
+        let didChange = false;
+        if (dy !== 0) {
+            for (let i = -maxSnapDistance; i <= maxSnapDistance; i++) {
+                if (Math.abs(i) < dxModifier && this.checkCollision(x + i, y + Math.sign(dy), this.w, this.h, levelData)) {
+                    didChange = true;
+                    dxModifier = i;
+                }
+            }
+        }
+        else {
+            dxModifier = 0;
+        }
+        if (!didChange) {
+            dxModifier = 0;
+        }
+        return dxModifier;
     }
     checkCollision(x, y, w, h, levelData) {
         const size = levelData.tileSize;

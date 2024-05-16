@@ -1,7 +1,7 @@
 class LevelData {
-    tileData:Array<number> = [];
+    tileData:number[] = [];
 
-    tileSet:Array<Tile> = [];
+    tileSet:Tile[] = [];
 
     width:number = 0;
     height:number = 0;
@@ -28,11 +28,11 @@ class LevelData {
         return this.size;
     }
 
-    set data(data:Array<number>) {
+    set data(data:number[]) {
         this.tileData = data;
     }
 
-    set tiles(tiles:Array<Tile>) {
+    set tiles(tiles:Tile[]) {
         this.tileSet = tiles;
     }
 
@@ -60,7 +60,7 @@ class LevelData {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
-    convertInBounds(index:number):Array<number> {
+    convertInBounds(index:number):number[] {
         return [index % this.width, Math.floor(index / this.width)];
     }
 }
