@@ -92,4 +92,28 @@ class MathHelper {
             x2, y2
         ]
     }
+
+    static bresenhamLine(x1:number, y1:number, x2:number, y2:number):number[] {
+        const array = [];
+
+        const dx = Math.abs(x2 - x1);
+        const dy = Math.abs(y2 - y1);
+        const sx = Math.sign(x2 - x1);
+        const sy = Math.sign(y2 - y1);
+
+        let err = dx - dy;
+
+        while (true) {
+            array.push(x1, y1)
+
+            if (x1 === x2 && y1 === y2) break;
+
+            const e2 = 2 * err;
+
+            if (e2 > -dy) { err -= dy; x1 += sx; }
+            if (e2 <  dx) { err += dx; y1 += sy; }
+        }
+
+        return array;
+    }
 }

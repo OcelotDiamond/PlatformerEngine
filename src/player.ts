@@ -9,7 +9,7 @@ class Player extends Entity {
     onGround:boolean = false;
     sneaking:boolean = false;
 
-    maxCoyoteTime:number = 3;
+    maxCoyoteTime:number = 5;
     coyoteTime:number = 0;
 
     lastMovementDirection:boolean = false;
@@ -101,21 +101,20 @@ class Player extends Entity {
             }
         }
 
-        dx = this.doXCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, dx);
-        this.x += dx;
+        const preDy = dy;
 
-        const preDY = dy;
+        [dx, dy] = this.doCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, Math.round(dx), Math.round(dy));
+
+        this.x += dx;
+        this.y += dy;
 
         dy += this.gravityForce;
 
         dx += this.windForceX;
         dy += this.windForceY;
 
-        dy = this.doYCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, dy);
-        this.y += dy;
-
         this.coyoteTime -= 1;
-        if (preDY == dy) {
+        if (Math.round(preDy) === dy) {
             this.onGround = true;
             this.coyoteTime = this.maxCoyoteTime;
         } else {

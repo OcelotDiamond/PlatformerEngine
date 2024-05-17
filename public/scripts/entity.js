@@ -15,6 +15,46 @@ class Entity {
     update(game, deltaTime) { }
     draw(gl, game) { }
     onInteraction(player, game) { }
+    doCollision(levelData, x, y, dx, dy) {
+        const { min, abs } = Math;
+        if (this.checkCollision(min(x, x + dx) - 1, min(y, y + dy) - 1, this.w + abs(dx) + 1, this.h + abs(dy) + 1, levelData)) {
+            return [dx, dy];
+        }
+        if (!this.checkCollision(x, y, this.w, this.h, levelData)) {
+            return [0, 0];
+        }
+        const testPoints = MathHelper.bresenhamLine(0, 0, dx, dy);
+        let index = 0;
+        for (; index < testPoints.length; index += 2) {
+            if (!this.checkCollision(testPoints[index] + x, testPoints[index + 1] + y, this.w, this.h, levelData)) {
+                break;
+            }
+        }
+        if (index === testPoints.length) {
+            return [dx, dy];
+        }
+        const residualDx = dx - testPoints[index - 2];
+        const residualDy = dy - testPoints[index - 1];
+        dx = testPoints[index - 2];
+        dy = testPoints[index - 1];
+        if (this.checkCollision(x + dx + Math.sign(residualDx), y + dy, this.w, this.h, levelData)) {
+            for (let i = 1; i <= Math.abs(residualDx); i++) {
+                if (!this.checkCollision(x + dx + Math.sign(residualDx) * i, y + dy, this.w, this.h, levelData)) {
+                    return [dx + Math.sign(residualDx) * (i - 1), dy];
+                }
+            }
+            return [dx + residualDx, dy];
+        }
+        else if (this.checkCollision(x + dx, y + dy + Math.sign(residualDy), this.w, this.h, levelData)) {
+            for (let i = 1; i <= Math.abs(residualDy); i++) {
+                if (!this.checkCollision(x + dx, y + dy + Math.sign(residualDy) * i, this.w, this.h, levelData)) {
+                    return [dx, dy + Math.sign(residualDy) * (i - 1)];
+                }
+            }
+            return [dx, dy + residualDy];
+        }
+        return [dx, dy];
+    }
     doXCollision(levelData, x, y, dx) {
         dx = Math.round(dx);
         let iterations = Math.floor(dx / this.w);

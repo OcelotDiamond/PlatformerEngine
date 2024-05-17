@@ -6,7 +6,7 @@ class Player extends Entity {
     jumpPower = 18;
     onGround = false;
     sneaking = false;
-    maxCoyoteTime = 3;
+    maxCoyoteTime = 5;
     coyoteTime = 0;
     lastMovementDirection = false;
     gravityForce = 1;
@@ -81,16 +81,15 @@ class Player extends Entity {
                 this.lastMovementDirection = false;
             }
         }
-        dx = this.doXCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, dx);
+        const preDy = dy;
+        [dx, dy] = this.doCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, Math.round(dx), Math.round(dy));
         this.x += dx;
-        const preDY = dy;
+        this.y += dy;
         dy += this.gravityForce;
         dx += this.windForceX;
         dy += this.windForceY;
-        dy = this.doYCollision(game.levelDataLevels[this.levelDataIndex], this.x, this.y, dy);
-        this.y += dy;
         this.coyoteTime -= 1;
-        if (preDY == dy) {
+        if (Math.round(preDy) === dy) {
             this.onGround = true;
             this.coyoteTime = this.maxCoyoteTime;
         }

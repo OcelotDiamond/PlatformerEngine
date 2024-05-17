@@ -79,7 +79,7 @@ class Renderer {
 
         const texCoordArray = new Float32Array(defaultTexCoordArray);
 
-        console.log(x, y, x2, y2)
+        //console.log(x, y, x2, y2)
 
         this.drawTextures(gl, texture, posArray, texCoordArray, 6);
     }
