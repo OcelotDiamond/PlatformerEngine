@@ -16,8 +16,7 @@ class Entity {
     draw(gl, game) { }
     onInteraction(player, game) { }
     doCollision(levelData, x, y, dx, dy) {
-        const { min, abs } = Math;
-        if (this.checkCollision(min(x, x + dx) - 1, min(y, y + dy) - 1, this.w + abs(dx) + 1, this.h + abs(dy) + 1, levelData)) {
+        if (this.checkCollision(Math.min(x, x + dx) - 1, Math.min(y, y + dy) - 1, this.w + Math.abs(dx) + 1, this.h + Math.abs(dy) + 1, levelData)) {
             return [dx, dy];
         }
         if (!this.checkCollision(x, y, this.w, this.h, levelData)) {

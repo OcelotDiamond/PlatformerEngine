@@ -1,57 +1,62 @@
 class Controls {
     static keys:Keys = {};
 
-    static mouseX:number = 0;
-    static mouseY:number = 0;
-
-    static leftMouse:boolean = false;
-    static middleMouse:boolean = false;
-    static rightMouse:boolean = false;
+    static events:KeyEvent[] = [];
 
     static init() {
         window.addEventListener('keydown', Controls.keyDown);
         window.addEventListener('keyup', Controls.keyUp);
-
-        window.addEventListener('mousemove', Controls.mouseMove);
-
-        window.addEventListener('mousedown', Controls.mouseClick);
-        window.addEventListener('mouseup', Controls.mouseClick);
     }
 
     static keyDown(event:KeyboardEvent) {
-        Controls.keys[event.key.toLowerCase()] = true;
+        const key = event.key.toLowerCase();
+        Controls.keys[key] = true;
+        Controls.events.push(new KeyEvent(key, false));
     }
 
     static keyUp(event:KeyboardEvent) {
         Controls.keys[event.key.toLowerCase()] = undefined;
     }
 
-    static mouseMove(event:MouseEvent) {
-        Controls.mouseX = event.clientX;
-        Controls.mouseY = event.clientY;
-    }
-
-    static mouseClick(event:MouseEvent) {
-        let n:number = event.buttons;
-        if (n >= 16) {
-            n -= 16
-        }
-        if (n >= 8) {
-            n -= 8 
-        }
-        Controls.middleMouse = n >= 4;
-        if (n >= 4) {
-            n -= 4
-        }
-        Controls.rightMouse = n >= 2;
-        if (n >= 2) {
-            n -= 2
-        }
-        Controls.leftMouse = n >= 1;
+    static getEvents() {
+        const events = Controls.events;
+        Controls.events = [];
+        return events;
     }
 
     static isKeyDown(key:string) {
         return typeof(Controls.keys[key]) === 'boolean';
+    }
+}
+
+class KeyEvent {
+    key:string;
+    isRelease:boolean;
+    timeSinceFired:number = 0; // Will only work through the InputBuffer class
+
+    constructor(key:string, isRelease:boolean) {
+        this.key = key;
+        this.isRelease = isRelease;
+    }
+}
+
+class InputBuffer {
+    static events:KeyEvent[] = [];
+    static maxDelay:number = 1000; // Time in ms
+
+    static update(deltaTime:number) {
+        for (let i = 0; i < this.events.length; i++) {
+            this.events[i].timeSinceFired += deltaTime;
+
+            if (this.events[i].timeSinceFired > this.maxDelay) {
+                this.events.splice(i,1);
+                i--;
+            }
+        }
+
+        const newEvents = Controls.getEvents();
+
+        this.events.push(...newEvents);
     }
 }
 

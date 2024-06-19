@@ -1,46 +1,48 @@
 class Controls {
     static keys = {};
-    static mouseX = 0;
-    static mouseY = 0;
-    static leftMouse = false;
-    static middleMouse = false;
-    static rightMouse = false;
+    static events = [];
     static init() {
         window.addEventListener('keydown', Controls.keyDown);
         window.addEventListener('keyup', Controls.keyUp);
-        window.addEventListener('mousemove', Controls.mouseMove);
-        window.addEventListener('mousedown', Controls.mouseClick);
-        window.addEventListener('mouseup', Controls.mouseClick);
     }
     static keyDown(event) {
-        Controls.keys[event.key.toLowerCase()] = true;
+        const key = event.key.toLowerCase();
+        Controls.keys[key] = true;
+        Controls.events.push(new KeyEvent(key, false));
     }
     static keyUp(event) {
         Controls.keys[event.key.toLowerCase()] = undefined;
     }
-    static mouseMove(event) {
-        Controls.mouseX = event.clientX;
-        Controls.mouseY = event.clientY;
-    }
-    static mouseClick(event) {
-        let n = event.buttons;
-        if (n >= 16) {
-            n -= 16;
-        }
-        if (n >= 8) {
-            n -= 8;
-        }
-        Controls.middleMouse = n >= 4;
-        if (n >= 4) {
-            n -= 4;
-        }
-        Controls.rightMouse = n >= 2;
-        if (n >= 2) {
-            n -= 2;
-        }
-        Controls.leftMouse = n >= 1;
+    static getEvents() {
+        const events = Controls.events;
+        Controls.events = [];
+        return events;
     }
     static isKeyDown(key) {
         return typeof (Controls.keys[key]) === 'boolean';
+    }
+}
+class KeyEvent {
+    key;
+    isRelease;
+    timeSinceFired = 0;
+    constructor(key, isRelease) {
+        this.key = key;
+        this.isRelease = isRelease;
+    }
+}
+class InputBuffer {
+    static events = [];
+    static maxDelay = 1000;
+    static update(deltaTime) {
+        for (let i = 0; i < this.events.length; i++) {
+            this.events[i].timeSinceFired += deltaTime;
+            if (this.events[i].timeSinceFired > this.maxDelay) {
+                this.events.splice(i, 1);
+                i--;
+            }
+        }
+        const newEvents = Controls.getEvents();
+        this.events.push(...newEvents);
     }
 }
